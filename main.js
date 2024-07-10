@@ -66,9 +66,10 @@ const render = () => {
                 <p>
                     ${truncatedDescription}
                 </p>
-               <div>${news.rights || "no source"}  ${moment(
-        news.published_date
-     ).fromNow()}</div>
+                <div>
+                   ${news.source.name || 'no source'} * ${new Date(news.publishedAt).toLocaleString()}
+                </div>
+            </div>
         </div>`;
     }).join("");
 
