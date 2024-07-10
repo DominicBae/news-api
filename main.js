@@ -27,19 +27,10 @@ closeBtn.addEventListener('click', () => {
 });
 
 searchIcon.addEventListener('click', () => {
-    if (window.innerWidth <= 768) {
-        searchBar.style.position = 'static';
-        searchBar.style.marginTop = '10px';
+    if (searchBar.classList.contains('show')) {
+        searchBar.classList.remove('show');
     } else {
-        searchBar.style.position = 'absolute';
-        searchBar.style.top = '60px';
-        searchBar.style.marginTop = '0';
-    }
-
-    if (searchBar.style.display === 'none' || searchBar.style.display === '') {
-        searchBar.style.display = 'flex';
-    } else {
-        searchBar.style.display = 'none';
+        searchBar.classList.add('show');
     }
 });
 
