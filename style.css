@@ -3,12 +3,84 @@
     margin-top: 1em;
     display: flex;
     justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
 .logo {
     width: 180px;
 }
 
+.hamburger {
+    display: none;
+    cursor: pointer;
+    font-size: 24px;
+    position: absolute;
+    left: 20px;
+}
+
+.search-icon {
+    cursor: pointer;
+    font-size: 24px;
+    position: absolute;
+    left: 60px;
+}
+
+.search-bar {
+    display: none;
+    position: absolute;
+    left: 90px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: px;
+}
+
+.search-bar input {
+    padding: 5px;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+/* 사이드바 */
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: beige;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidebar .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.sidebar .menus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar .menus button {
+    border: none;
+    background: none;
+    margin: 10px 0;
+}
+
+.sidebar .menus button:hover {
+    background-color: black;
+    color: white;
+}
+
+/* 메인 메뉴 */
 .menus {
     margin-top: 1em;
     display: flex;
@@ -36,4 +108,25 @@
 
 .news {
     border-bottom: 2px solid black;
+}
+
+/* 모바일 화면에서 햄버거 메뉴 보이기 */
+@media screen and (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+
+    .search-bar {
+        display: flex;
+    }
+
+    #main-menus {
+        display: none;
+    }
+}
+
+@media screen and (min-width:769px) {
+        .search {
+            display: none;
+        }
 }
