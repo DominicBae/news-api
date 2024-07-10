@@ -66,10 +66,9 @@ const render = () => {
                 <p>
                     ${truncatedDescription}
                 </p>
-                <div>${news.rights || "no source"}  ${moment(
-            news.published_date
-        ).fromNow()}</div>
-            </div>
+               <div>${news.rights || "no source"}  ${moment(
+        news.published_date
+     ).fromNow()}</div>
         </div>`;
     }).join("");
 
