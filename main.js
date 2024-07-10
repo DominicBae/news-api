@@ -7,7 +7,7 @@ const getLatestNews = async () => {
     const data = await response.json();
     newsList = data.articles;
     render();
-    console.log("dddd", newsList);
+    console.log("News List:", newsList);
 };
 
 const hamburger = document.getElementById('hamburger');
@@ -44,27 +44,36 @@ const handleResize = () => {
 window.addEventListener('resize', handleResize);
 window.addEventListener('load', handleResize);
 
+const truncateText = (text, maxLength) => {
+    if (text.length > maxLength) {
+        return text.substring(0, maxLength) + '...';
+    }
+    return text;
+};
 
 const render = () => {
-    const newsHTML = newsList.map(news => `<div class="row news pt-3 pb-3">
-        <div class="col-lg-4">
-            <img class="news-img-size"
-                src=${news.urlToImage}
-                >
-        </div>
-        <div class="col-lg-8 mt-2">
-            <h2>${news.title}</h2>
-            <p>
-                ${news.description}
-            </p>
-            <div>
-               ${news.source.name} * ${news.publishedAt}
+    const newsHTML = newsList.map(news => {
+        const truncatedDescription = truncateText(news.description || '내용없음', 200);
+        const imageUrl = news.urlToImage || './path/to/default-image.png'; // 기본 이미지를 사용할 경로로 수정하세요
+        return `<div class="row news pt-3 pb-3">
+            <div class="col-lg-4">
+                <img class="news-img-size"
+                    src="${imageUrl}"
+                    alt="news image">
             </div>
-        </div>
-    </div>`)
-        .join("");
+            <div class="col-lg-8 mt-2">
+                <h2>${news.title}</h2>
+                <p>
+                    ${truncatedDescription}
+                </p>
+                <div>${news.rights || "no source"}  ${moment(
+            news.published_date
+        ).fromNow()}</div>
+            </div>
+        </div>`;
+    }).join("");
 
-    document.getElementById('news-board').innerHTML = newsHTML
-}
+    document.getElementById('news-board').innerHTML = newsHTML;
+};
 
 getLatestNews();
