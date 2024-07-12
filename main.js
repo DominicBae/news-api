@@ -18,6 +18,16 @@ let searchButton = document.querySelector(".search-button");
 
 searchButton.addEventListener("click", setKeywords);
 
+// 검색창 비우기
+inputArea.addEventListener("focus", function () { inputArea.value = "" })
+
+// Enter 키를 감지하여 검색 함수 호출
+inputArea.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    setKeywords();
+  }
+});
+
 function searchIconActivate() {
   searchContainer.classList.toggle("active");
 }
@@ -76,7 +86,7 @@ function render() {
 
     let urlToImage = news.urlToImage;
     if (!urlToImage) {
-      urlToImage = "'./images/imgnotavailable.png'";
+      urlToImage = "https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg"; // 기본 이미지 URL
     }
 
     let nameSource = news.source.name;
@@ -92,7 +102,7 @@ function render() {
     return `
       <div class="row article">
         <div class="col-lg-4 article-img">
-          <img class="img-content" src=${urlToImage} alt="news image">
+          <img class="img-content" src=${urlToImage} alt="news image" onerror="this.src='https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg';">
         </div>
         <div class="col-lg-8 article-main">
           <div class="title-content">
@@ -123,10 +133,6 @@ function setCategory(cat) {
 }
 
 async function setKeywords() {
-  if (inputArea.value === "") {
-    alert("검색할 내용을 입력해주세요.");
-    return;
-  }
   keyword = `&q=${inputArea.value}`;
   inputArea.value = "";
   getLatestNews();
