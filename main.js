@@ -41,20 +41,38 @@ function navBarDeActivate() {
 
 function handleAnimationEnd() {
   navBar.classList.toggle('active');
-  navBar.removeEventListener("animationend", handleAnimationEnd)
+  navBar.removeEventListener("animationend", handleAnimationEnd);
 }
 
 // API 조작
-const getNews = async() => {
-  const response = await fetch(url);
-  const data = await response.json();
-  newsList = data.articles;
-  render();
-}
-
 const getLatestNews = async () => {
-  url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&apiKey=${API_KEY}`); 
-  getNews();
+  const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`); 
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (response.status === 200) {
+      if (data.articles.length === 0) {
+        throw new Error("입력한 결과의 기사가 없습니다.");
+      }
+      newsList = data.articles;
+      totalResult = data.totalResults;
+      render();
+      console.log("News List:", newsList);
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error) {
+    errorRender(error.message);
+  }
+};
+
+const errorRender = (errorMessage) => {
+  const errorHTML = `
+    <div class="alert alert-danger" role="alert">
+      ${errorMessage}
+    </div>`;
+  document.getElementById("news-board").innerHTML = errorHTML;
 };
 
 function render() {
@@ -104,14 +122,6 @@ function render() {
   }).join('');
 
   articleContainer.innerHTML = resultHTML;
-}
-
-const errorRender = (message) => {
-  const errorHTML = `
-    <div class="alert alert-danger" role="alert">
-      ${message}
-    </div>`;
-  articleContainer.innerHTML = errorHTML;
 }
 
 function setCategory(cat) {
