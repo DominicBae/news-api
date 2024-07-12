@@ -5,6 +5,7 @@ let newsList = [];
 let totalResult = 0;
 let page = 1;
 const pageSize = 10;
+let url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&apiKey=${API_KEY}`); 
 
 // UI 작동
 let navBarIcon = document.querySelector(".nav-bar-icon");
@@ -48,27 +49,18 @@ function handleAnimationEnd() {
 }
 
 // API 조작
-const getLatestNews = async () => {
-  const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`); 
+const getNews = async() => {
+  const response = await fetch(url);
+  const data = await response.json();
+  newsList = data.articles;
+  render();
+}
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    if (response.status === 200) {
-      if (data.articles.length == 0) {
-        throw new Error("No result for this search.");
-      }
-      newsList = data.articles;
-      totalResult = data.totalResults;
-      render();
-      console.log("News List:", newsList);
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (error) {
-    errorRender(error.message);
-  }
+const getLatestNews = async () => {
+  url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`); 
+  getNews();
 };
+
 
 function render() {
   const resultHTML = newsList?.map(news => {
