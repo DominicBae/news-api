@@ -1,103 +1,195 @@
-const API_KEY = `32edf3a924aa466aa0c04340e74dcec2`;
+let category = "";
+let keyword = "";
+const API_KEY = "10941bbbe8284718a639d2bfb6df1fcc";
 let newsList = [];
-const menus = document.querySelectorAll(".menus button");
-menus.forEach(menu => menu.addEventListener("click", (event) => getNewsByCategory(event)));
+let totalResult = 0;
+let page = 1;
+const pageSize = 10;
+const groupSize = 5;
+let totalPageC;
 
+// UI 작동
+let navBarIcon = document.querySelector(".nav-bar-icon");
+let navBar = document.querySelector(".nav-bar");
+let xMark = document.querySelector(".x-mark");
+let searchContainer = document.querySelector(".search-container");
+let articleContainer = document.querySelector("#news-board");
+let menuButton = document.querySelectorAll(".nav-bar button");
+let inputArea = document.querySelector(".input-area");
+let searchButton = document.querySelector(".search-button");
+
+searchButton.addEventListener("click", setKeywords);
+
+function searchIconActivate() {
+  searchContainer.classList.toggle("active");
+}
+
+function navBarActivate() {
+  navBar.classList.toggle('active');
+  navBar.style.animation = "SlideIn 0.3s ease-in-out";
+}
+
+function navBarDeActivate() {
+  navBar.style.animation = "SlideOut 0.3s ease-in-out";
+  navBar.addEventListener("animationend", handleAnimationEnd);
+}
+
+function handleAnimationEnd() {
+  navBar.classList.toggle('active');
+  navBar.removeEventListener("animationend", handleAnimationEnd)
+}
+
+// API 조작
 const getLatestNews = async () => {
-    const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&apiKey=${API_KEY}`);
+  const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=kr&pageSize=${pageSize}&page=${page}${category}${keyword}`); 
+
+  try {
     const response = await fetch(url);
     const data = await response.json();
-    newsList = data.articles;
-    render();
-    console.log("News List:", newsList);
-};
-
-const getNewsByCategory = async (event) => {
-    const category = event.target.textContent.toLowerCase();
-    console.log("category", category);
-    const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&category=${category}&apiKey=${API_KEY}`);
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log("ddd", data);
-    newsList = data.articles;
-    render();
-};
-
-const hamburger = document.getElementById('hamburger');
-const sidebar = document.getElementById('sidebar');
-const closeBtn = document.getElementById('close-btn');
-const searchIcon = document.getElementById('search-icon');
-const searchBar = document.getElementById('search-bar');
-const search = document.querySelector('.search');
-
-hamburger.addEventListener('click', () => {
-    sidebar.style.width = '250px';
-});
-
-closeBtn.addEventListener('click', () => {
-    sidebar.style.width = '0';
-});
-
-searchIcon.addEventListener('click', () => {
-    if (searchBar.classList.contains('show')) {
-        searchBar.classList.remove('show');
+    if (response.status === 200) {
+      if (data.articles.length == 0) {
+        throw new Error("No result for this search.");
+      }
+      newsList = data.articles;
+      totalResult = data.totalResults;
+      render();
+      paginationRender();
+      console.log("cate", newsList);
     } else {
-        searchBar.classList.add('show');
+      throw new Error(data.message);
     }
-});
-
-const getNewsByKeyword = async () => {
-    const keyword = document.getElementById("search-input").value;
-    console.log("keyword", keyword);
-    const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?q=${keyword}&apiKey=${API_KEY}`);
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log("keyword", data);
-    newsList = data.articles
-    render();
+  } catch (error) {
+    errorRender(error.message);
+  }
 };
 
-const handleResize = () => {
-    if (window.innerWidth <= 768) {
-        search.style.display = 'none';
-    } else {
-        search.style.display = 'flex';
+function render() {
+  const resultHTML = newsList?.map(news => {
+    let title = news.title;
+    if (title && title.length > 40) {
+      title = title.substring(0, 40) + " ...";
     }
-};
 
-window.addEventListener('resize', handleResize);
-window.addEventListener('load', handleResize);
-
-const truncateText = (text, maxLength) => {
-    if (text.length > maxLength) {
-        return text.substring(0, maxLength) + '...';
+    let description = news.description;
+    if (description && description.length > 200) {
+      description = description.substring(0, 200) + " ...";
+    } else if (!description) {
+      description = "내용 없음";
     }
-    return text;
-};
 
-const render = () => {
-    const newsHTML = newsList.map(news => {
-        const truncatedDescription = truncateText(news.description || '내용없음', 200);
-        const imageUrl = news.urlToImage || './path/to/default-image.png'; // 기본 이미지를 사용할 경로로 수정하세요
-        return `<div class="row news pt-3 pb-3">
-            <div class="col-lg-4">
-                <img class="news-img-size"
-                    src="${imageUrl}"
-                    alt="news image">
-            </div>
-            <div class="col-lg-8 mt-2">
-                <h2>${news.title}</h2>
-                <p>
-                    ${truncatedDescription}
-                </p>
-                <div>
-                   ${news.source.name || 'no source'} * ${new Date(news.publishedAt).toLocaleString()}
-                </div>
-            </div>
-        </div>`;
-    }).join("");
+    let urlToImage = news.urlToImage;
+    if (!urlToImage) {
+      urlToImage = "'./images/imgnotavailable.png'";
+    }
 
-    document.getElementById('news-board').innerHTML = newsHTML;
-};
+    let nameSource = news.source.name;
+    if (!nameSource) {
+      nameSource = "출처 없음";
+    }
+
+    let author = news.author;
+    if (!author) {
+      author = "기자 정보 없음";
+    }
+
+    return `
+      <div class="row article">
+        <div class="col-lg-4 article-img">
+          <img class="img-content" src=${urlToImage} alt="news image">
+        </div>
+        <div class="col-lg-8 article-main">
+          <div class="title-content">
+            <h2 class="article-title">${title}</h2>
+            <p class="article-content">${description}</p>
+          </div>
+          <div class="article-info">
+            ${nameSource} | ${author} | ${moment(news.publishedAt).fromNow()}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  articleContainer.innerHTML = resultHTML;
+}
+
+const errorRender = (message) => {
+  const errorHTML = `
+    <div class="alert alert-danger" role="alert">
+      ${message}
+    </div>`;
+  articleContainer.innerHTML = errorHTML;
+}
+
+function setCategory(cat) {
+  category = `&category=${cat}`;
+  getLatestNews();
+}
+
+async function setKeywords() {
+  if (inputArea.value === "") {
+    alert("검색할 내용을 입력해주세요.");
+    return;
+  }
+  keyword = `&q=${inputArea.value}`;
+  inputArea.value = "";
+  getLatestNews();
+}
+
+function paginationRender() {
+  const totalPage = Math.ceil(totalResult / pageSize);
+  totalPageC = totalPage;
+  const pageGroup = Math.ceil(page / groupSize);
+  let lastPage = pageGroup * groupSize;
+  if (lastPage > totalPage) {
+    lastPage = totalPage;
+  }
+  let firstPage = lastPage - (groupSize - 1) <= 0 ? 1 : lastPage - (groupSize - 1);
+  if (lastPage % 5 !== 0) {
+    firstPage = lastPage - 5;
+    if (firstPage <= 0) {
+      firstPage = 1;
+    }
+  }
+
+  let paginationHTML = "";
+
+  if (totalPage > groupSize && pageGroup !== 1) {
+    paginationHTML += `
+      <li class="page-item ${pageGroup === 1 ? 'disabled' : ''}"><a class="page-link" onclick="moveNextPage('f')"><<</a></li>
+      <li class="page-item ${page === 1 ? 'disabled' : ''}"><a class="page-link" onclick="moveNextPage('-')"><</a></li>`;
+  }
+
+  for (let i = firstPage; i <= lastPage; i++) {
+    paginationHTML += `
+      <li class="page-item ${i === page ? 'active' : ''}" onclick="moveToPage(${i})"><a class="page-link">${i}</a></li>`;
+  }
+
+  if (totalPage > groupSize && firstPage !== totalPage - groupSize + 1) {
+    paginationHTML += `
+      <li class="page-item ${page === totalPage ? 'disabled' : ''}"><a class="page-link" onclick="moveNextPage('+')">></a></li>
+      <li class="page-item ${(totalPage - groupSize + 1) <= page && totalPage >= page ? 'disabled' : ''}"><a class="page-link" onclick="moveNextPage('l')">>></a></li>`;
+  }
+
+  document.querySelector(".pagination").innerHTML = paginationHTML;
+}
+
+function moveToPage(pageNum) {
+  page = pageNum;
+  getLatestNews();
+}
+
+function moveNextPage(next) {
+  if (next === '-') {
+    page--;
+  } else if (next === '+') {
+    page++;
+  } else if (next === 'f') {
+    page = 1;
+  } else if (next === 'l') {
+    page = totalPageC - groupSize + 1;
+  }
+  getLatestNews();
+}
 
 getLatestNews();
+paginationRender();
