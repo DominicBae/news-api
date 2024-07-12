@@ -86,7 +86,7 @@ function render() {
 
     let author = news.author;
     if (!author) {
-      author = "기자 정보 없음";
+      author = "작성자 미기재";
     }
 
     return `
