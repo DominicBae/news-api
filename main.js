@@ -5,7 +5,6 @@ let newsList = [];
 let totalResult = 0;
 let page = 1;
 const pageSize = 10;
-let url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&apiKey=${API_KEY}`); 
 
 // UI 작동
 let navBarIcon = document.querySelector(".nav-bar-icon");
@@ -18,9 +17,6 @@ let inputArea = document.querySelector(".input-area");
 let searchButton = document.querySelector(".search-button");
 
 searchButton.addEventListener("click", setKeywords);
-
-// 검색창 비우기
-inputArea.addEventListener("focus", function () { inputArea.value = "" })
 
 // Enter 키를 감지하여 검색 함수 호출
 inputArea.addEventListener("keydown", function(event) {
@@ -57,10 +53,9 @@ const getNews = async() => {
 }
 
 const getLatestNews = async () => {
-  url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`); 
+  url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&apiKey=${API_KEY}`); 
   getNews();
 };
-
 
 function render() {
   const resultHTML = newsList?.map(news => {
@@ -125,6 +120,10 @@ function setCategory(cat) {
 }
 
 async function setKeywords() {
+  if (inputArea.value === "") {
+    alert("검색할 내용을 입력해주세요.");
+    return;
+  }
   keyword = `&q=${inputArea.value}`;
   inputArea.value = "";
   getLatestNews();
