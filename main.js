@@ -5,6 +5,7 @@ let newsList = [];
 let totalResult = 0;
 let page = 1;
 const pageSize = 10;
+const groupSize = 5;
 
 // UI 작동
 let navBarIcon = document.querySelector(".nav-bar-icon");
@@ -19,7 +20,7 @@ let searchButton = document.querySelector(".search-button");
 searchButton.addEventListener("click", setKeywords);
 
 // Enter 키를 감지하여 검색 함수 호출
-inputArea.addEventListener("keydown", function(event) {
+inputArea.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
     setKeywords();
   }
@@ -45,27 +46,33 @@ function handleAnimationEnd() {
 }
 
 // API 조작
-const getLatestNews = async () => {
-  const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`); 
+const getNews = async () => {
+  const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`);
 
   try {
     const response = await fetch(url);
     const data = await response.json();
     if (response.status === 200) {
       if (data.articles.length === 0) {
-        throw new Error("입력한 결과의 기사가 없습니다.");
+        throw new Error("No result for this search.");
       }
       newsList = data.articles;
       totalResult = data.totalResults;
       render();
+      paginationRender();
       console.log("News List:", newsList);
     } else {
-      throw new Error(data.message);
+      throw new Error(data.message || `Error: ${response.status}`);
     }
   } catch (error) {
     errorRender(error.message);
   }
 };
+
+const getLatestNews = async () => {
+  url = new URL (`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`)
+  getNews();
+}
 
 const errorRender = (errorMessage) => {
   const errorHTML = `
@@ -137,6 +144,36 @@ async function setKeywords() {
   keyword = `&q=${inputArea.value}`;
   inputArea.value = "";
   getLatestNews();
+}
+
+const paginationRender = () => {
+  const pageGroup = Math.ceil(page / groupSize)
+  const lastPage = pageGroup * groupSize
+  const firstPage = lastPage - (groupSize - 1);
+
+  let paginationHTML = ``
+
+  for (let i = firstPage; i <= lastPage; i++) {
+    paginationHTML += `<li class="page-item" onclick="moveToPage(${i})"><a class="page-link">${i}</a></li>`
+  }
+
+  document.querySelector(".pagination").innerHTML = paginationHTML;
+
+  // <nav aria-label="Page navigation example">
+  //   <ul class="pagination">
+  //     {/* <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+  //   <li class="page-item"><a class="page-link" href="#">1</a></li>
+  //   <li class="page-item"><a class="page-link" href="#">2</a></li>
+  //   <li class="page-item"><a class="page-link" href="#">3</a></li>
+  //   <li class="page-item"><a class="page-link" href="#">Next</a></li> */}
+  //   </ul>
+  // </nav>
+}
+
+const moveToPage = (pageNum) => {
+  console.log("movetopage", pageNum);
+  page = pageNum;
+  getNews();
 }
 
 getLatestNews();
