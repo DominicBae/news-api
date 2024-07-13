@@ -50,6 +50,8 @@ const getNews = async () => {
   const url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`);
 
   try {
+    url.searchParams.set("page", page);
+    url.searchParams.set("pageSize", pageSize);
     const response = await fetch(url);
     const data = await response.json();
     if (response.status === 200) {
@@ -70,7 +72,7 @@ const getNews = async () => {
 };
 
 const getLatestNews = async () => {
-  url = new URL (`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`)
+  url = new URL(`https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=us&pageSize=${pageSize}&page=${page}${category}${keyword}&apiKey=${API_KEY}`)
   getNews();
 }
 
@@ -147,16 +149,23 @@ async function setKeywords() {
 }
 
 const paginationRender = () => {
-  const pageGroup = Math.ceil(page / groupSize)
-  const lastPage = pageGroup * groupSize
-  const firstPage = lastPage - (groupSize - 1);
+  const totalPages = Math.ceil(totalResult / pageSize);
+  const pageGroup = Math.ceil(page / groupSize);
 
-  let paginationHTML = ``
-
-  for (let i = firstPage; i <= lastPage; i++) {
-    paginationHTML += `<li class="page-item" onclick="moveToPage(${i})"><a class="page-link">${i}</a></li>`
+  let lastPage = pageGroup * groupSize;
+  if (lastPage > totalPages) {
+    lastPage = totalPages;
   }
 
+  const firstPage = lastPage - (groupSize - 1) <= 0 ? 1 : lastPage - (groupSize - 1);
+
+  let paginationHTML = `<li class="page-item" onclick="moveToPage(${page-1})"><a class="page-link" href="#">Previous</a></li>`
+
+
+  for (let i = firstPage; i <= lastPage; i++) {
+    paginationHTML += `<li class="page-item ${i === page ? "active" : ""}" onclick="moveToPage(${i})"><a class="page-link">${i}</a></li>`;
+  }
+  paginationHTML += `<li class="page-item" onclick="moveToPage(${page+1})"><a class="page-link" href="#">Next</a></li>`
   document.querySelector(".pagination").innerHTML = paginationHTML;
 
   // <nav aria-label="Page navigation example">
