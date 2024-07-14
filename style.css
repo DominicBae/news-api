@@ -161,6 +161,10 @@ body {
     margin-top: 1.5em;
 }
 
+.page-link {
+    cursor: pointer;
+}
+
 /* 모바일 화면에서 햄버거 아이콘 보이기 */
 @media (max-width: 600px) {
     .nav-bar-icon {
