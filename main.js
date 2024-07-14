@@ -135,6 +135,7 @@ function render() {
 
 function setCategory(cat) {
   category = `&category=${cat}`;
+  page = 1; // 페이지 초기화
   getLatestNews();
 }
 
@@ -145,6 +146,7 @@ async function setKeywords() {
   }
   keyword = `&q=${inputArea.value}`;
   inputArea.value = "";
+  page = 1; // 페이지 초기화
   getLatestNews();
 }
 
@@ -161,7 +163,7 @@ const paginationRender = () => {
 
   let paginationHTML = '';
 
-  if (pageGroup > 1) {
+  if (pageGroup > 1 || page > 1) {
     paginationHTML += `
       <li class="page-item" onclick="moveToPage(1)"><a class="page-link" href="#">&laquo;</a></li>
       <li class="page-item" onclick="moveToPage(${page-1})"><a class="page-link" href="#">&lt;</a></li>`;
@@ -171,7 +173,7 @@ const paginationRender = () => {
     paginationHTML += `<li class="page-item ${i === page ? "active" : ""}" onclick="moveToPage(${i})"><a class="page-link">${i}</a></li>`;
   }
 
-  if (pageGroup * groupSize < totalPages) {
+  if (pageGroup * groupSize < totalPages || page < totalPages) {
     paginationHTML += `
       <li class="page-item" onclick="moveToPage(${page+1})"><a class="page-link" href="#">&gt;</a></li>
       <li class="page-item" onclick="moveToPage(${totalPages})"><a class="page-link" href="#">&raquo;</a></li>`;
